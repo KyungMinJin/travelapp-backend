@@ -1,28 +1,13 @@
 import Router from 'koa-router';
 import * as boardCtrl from './board.ctrl';
 
-const board = new Router();
+const boards = new Router();
 
-// const printInfo = ctx => {
-//   ctx.body = {
-//     method: ctx.method,
-//     path: ctx.path,
-//     params: ctx.params
-//   };
-// };
+boards.get('/', boardCtrl.list);
+boards.post('/', boardCtrl.write);
+boards.get('/:id', boardCtrl.read);
+boards.put('/:id', boardCtrl.replace);
+boards.delete('/:id', boardCtrl.remove);
+boards.patch('/:id', boardCtrl.update);
 
-// board.get('/', printInfo);
-// board.post('/', printInfo);
-// board.get('/:id', printInfo);
-// board.get('/:id', printInfo);
-// board.delete('/:id', printInfo);
-// board.patch('/:id', printInfo);
-
-board.get('/', boardCtrl.list);
-board.post('/', boardCtrl.write);
-board.get('/:id', boardCtrl.read);
-board.get('/:id', boardCtrl.remove);
-board.delete('/:id', boardCtrl.remove);
-board.patch('/:id', boardCtrl.update);
-
-export default board;
+export default boards;
