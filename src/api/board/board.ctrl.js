@@ -71,19 +71,14 @@ export const read = async ctx => {
 /**특정 게시물 제거
  * DELETE /api/board/:id
  */
-export const remove = ctx => {
-  // const { id } = ctx.params;
-  // const index = board.findIndex(p => p.board_id.toString() === id);
-  // //포스트 없으면 오류
-  // if (index === -1) {
-  //   ctx.status = 404;
-  //   ctx.body = {
-  //     message: '포스트가 존재하지 않습니다.'
-  //   };
-  //   return;
-  // }
-  // post.slice(index, 1);
-  // ctx.status = 204; //NO content
+export const remove = async ctx => {
+  const { id } = ctx.params;
+  try {
+    await Board.findByIdAndRemove(id).exec();
+    ctx.status = 204;
+  } catch (e) {
+    ctx.throw(500, e);
+  }
 };
 
 /**포스트 수정(교체)
@@ -113,21 +108,19 @@ export const replace = ctx => {
  * PATCH /api/board/:id
  * {board_class, title, content, category, price, duration}
  */
-export const update = ctx => {
+export const update = async ctx => {
   //주어진 필드만
-  // const { id } = ctx.params;
-  // const index = board.findIndex(p => p.id.toString() === id);
-  // if (index === -1) {
-  //   ctx.status = 404;
-  //   ctx.body = {
-  //     message: '포스트가 존재하지 않습니다.'
-  //   };
-  //   return;
-  // }
-  // //기존 값에 정보 덮기
-  // board[index] = {
-  //   ...board[index],
-  //   ...ctx.request.body
-  // };
-  // ctx.body = board[index];
+  const { id } = ctx.params;
+  try {
+    const board = await Board.findByIdAndUpdate(id, ctx.request.body, {
+      new: true //true 면 새 데이터를 반환 false 면 업데이트 전 데이터 반환
+    }).exec();
+    if (!board) {
+      ctx.status = 404;
+      return;
+    }
+    ctx.body = board;
+  } catch (e) {
+    ctx.throw(500, e);
+  }
 };
