@@ -34,7 +34,9 @@ UserSchema.methods.generateToken = function() {
     //첫 파라미터에는 토큰 안에 넣고싶은 데이터 넣기
     {
       _id: this.id,
-      username: this.username
+      username: this.username,
+      nickname: this.nickname,
+      history: this.history
     },
     process.env.JWT_SECRET, //두번째로는 암호
     {
