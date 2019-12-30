@@ -97,10 +97,17 @@ export const list = async ctx => {
       .sort({ _id: -1 }) //역순으로 불러오기
       .limit(10) // 한번에 10개만 보이게
       .skip((page - 1) * 10)
+      .lean() //JSON 형태로 조회
       .exec();
     const postCount = await Board.countDocuments().exec();
     ctx.set('Last-Page', Math.ceil(postCount / 10));
-    ctx.body = boards;
+    ctx.body = boards.map(post => ({
+      ...post,
+      content:
+        post.content.length < 200
+          ? post.content
+          : `${post.content.slice(0, 200)}...`
+    }));
   } catch (e) {
     ctx.throw(500, e);
   }
