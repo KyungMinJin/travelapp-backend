@@ -71,7 +71,10 @@ export const write = async ctx => {
 };
 
 /** 게시물 조회
- * GET /api/board
+ * GET /api/board?board_class=&page=
+ * /api/board?board_class=1 -> 매거진
+ * /api/board?board_class=2 -> 이벤트
+ * /api/board?board_class=3 -> 스토어
  */
 export const list = async ctx => {
   //query는 문자열이므로 숫자로 변환
@@ -83,14 +86,20 @@ export const list = async ctx => {
     return;
   }
 
+  const { board_class } = ctx.query;
+  // boardClass 유효하면 객체 안에 넣고, 아니면 넣지 않음
+  const query = {
+    ...(board_class ? { boardClass: board_class } : {})
+  };
+
   try {
-    const boards = await Board.find()
+    const boards = await Board.find(query)
       .sort({ _id: -1 }) //역순으로 불러오기
       .limit(10) // 한번에 10개만 보이게
       .skip((page - 1) * 10)
       .lean() //JSON 형태로 조회
       .exec();
-    const postCount = await Board.countDocuments().exec();
+    const postCount = await Board.countDocuments(query).exec();
     ctx.set('Last-Page', Math.ceil(postCount / 10));
     ctx.body = boards.map(post => ({
       ...post,
