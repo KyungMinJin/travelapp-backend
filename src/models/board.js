@@ -26,7 +26,12 @@ const BoardSchema = new Schema({
   category: String,
   evaluation: { type: Number, default: 0 },
   price: { type: Number, default: 0 },
-  duration: String
+  duration: String,
+  user: {
+    _id: mongoose.Types.ObjectId,
+    username: String,
+    nickname: String
+  }
 });
 
 const Board = mongoose.model('Board', BoardSchema);

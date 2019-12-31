@@ -4,16 +4,6 @@ import Joi from 'joi';
 
 const { ObjectId } = mongoose.Types;
 
-/**유효한 아이디인지 체크 */
-export const checkObjectId = (ctx, next) => {
-  const { id } = ctx.params;
-  if (!ObjectId.isValid(id)) {
-    ctx.status = 400;
-    return;
-  }
-  return next();
-};
-
 /* 게시물 작성
 Post /api/board
 {
@@ -69,7 +59,8 @@ export const write = async ctx => {
     category,
     evaluation,
     price,
-    duration
+    duration,
+    user: ctx.state.user //게시물 작성자
   });
   try {
     await board.save();
@@ -116,19 +107,8 @@ export const list = async ctx => {
 /** 특정 게시물 조회
  * GET /api/board/:id
  */
-export const read = async ctx => {
-  const { id } = ctx.params;
-  //주어진 id 로 게시물 찾기
-  try {
-    const board = await Board.findById(id).exec();
-    if (!board) {
-      ctx.status = 404; // 없는 게시물
-      return;
-    }
-    ctx.body = board;
-  } catch (e) {
-    ctx.throw(500, e);
-  }
+export const read = ctx => {
+  ctx.body = ctx.state.board;
 };
 
 /**특정 게시물 제거
@@ -142,29 +122,6 @@ export const remove = async ctx => {
   } catch (e) {
     ctx.throw(500, e);
   }
-};
-
-/**포스트 수정(교체)
- * PUT api/board/:id
- * {board_class, title, content, category, price, duration}
- */
-export const replace = ctx => {
-  //통째로
-  // const { id } = ctx.params;
-  // const index = board.findIndex(p => p.id.toString() === id);
-  // if (index === -1) {
-  //   ctx.status = 404;
-  //   ctx.body = {
-  //     message: '포스트가 존재하지 않습니다.'
-  //   };
-  //   return;
-  // }
-  // //전체 덮어씌우기
-  // board[index] = {
-  //   id,
-  //   ...ctx.request.body
-  // };
-  // ctx.body = board[index];
 };
 
 /**특정 필드 변경
@@ -208,4 +165,35 @@ export const update = async ctx => {
   } catch (e) {
     ctx.throw(500, e);
   }
+};
+
+/**유효한 아이디인지 체크 */
+export const getBoardById = async (ctx, next) => {
+  const { id } = ctx.params;
+  if (!ObjectId.isValid(id)) {
+    ctx.status = 400;
+    return;
+  }
+  try {
+    const board = await Board.findById(id);
+    // 포스트가 존재하지 않을 때
+    if (!board) {
+      ctx.status = 404; //not found
+      return;
+    }
+    ctx.state.board = board;
+    return next();
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
+//작성자의 게시물인지 확인
+export const checkOwnPost = (ctx, next) => {
+  const { user, board } = ctx.state;
+  if (board.user._id.toString() !== user._id) {
+    ctx.status = 403;
+    return;
+  }
+  return next();
 };
