@@ -20,7 +20,7 @@
     "koa-static": "^5.0.0",
     "mariadb": "^2.4.1",
     "mongoose": "^5.9.25",
-    "sanitize-html": "^1.27.1"
+    "sanitize-html": "^2.3.2"
   },
   "devDependencies": {
     "eslint": "^7.4.0",
